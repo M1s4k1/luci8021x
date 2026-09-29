@@ -3,7 +3,11 @@
 'require uci';
 'require form';
 
-network.registerProtocol('ieee8021xclient', {
+// 注意：LuCI 会把协议文件当模块加载，工厂函数必须返回一个构造函数，
+// 因此这里必须写成 `return network.registerProtocol(...)`。
+// 少了 return，或者文件未正确安装（例如路径错误导致 404 返回 HTML），
+// 都会报：TypeError: "protocol.ieee8021xclient" factory yields invalid constructor
+return network.registerProtocol('ieee8021xclient', {
 	getI18n: function() {
 		return _('IEEE 802.1X Client');
 	},
@@ -26,10 +30,6 @@ network.registerProtocol('ieee8021xclient', {
 
 	getDevices: function() {
 		return null;
-	},
-
-	containsDevice: function(ifname) {
-		return (network.getIfnameOf(this.sid) == ifname);
 	},
 
 	renderFormOptions: function(s) {

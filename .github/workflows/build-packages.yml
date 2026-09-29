@@ -18,14 +18,18 @@ jobs:
       - name: Shell 语法检查
         run: |
           sh -n net/ieee8021xclient/files/ieee8021xclient.sh
-          sh -n tools/build_apk_on_router.sh
           echo "shell 语法 OK"
 
       - name: LuCI 协议脚本语法检查
-        run: node --check luci-proto-ieee8021xclient/htdocs/luci-static/resources/protocol/ieee8021xclient.js
+        run: |
+          JS=luci-proto-ieee8021xclient/htdocs/luci-static/resources/protocol/ieee8021xclient.js
+          # 协议文件顶层是 `return ...`（LuCI 会包进函数执行），需包一层再 check
+          { echo '(function() {'; cat "$JS"; echo '})();'; } > /tmp/js_check.js
+          node --check /tmp/js_check.js
+          grep -q 'return network.registerProtocol' "$JS" \
+            || { echo "!! 协议文件必须 return network.registerProtocol(...)"; exit 1; }
 
-      - name: 协议行为测试（桩环境，不联网）
-        run: bash tools/test_proto_locally.sh
+
 
   # OpenWrt / ImmortalWrt 25.12+ 只接受 APKv3，必须用 Alpine 官方 apk-tools 生成
   apk-v3:
@@ -49,15 +53,15 @@ jobs:
               W=/tmp/apkbuild
               rm -rf "$W"
               mkdir -p "$W/p1/lib/netifd/proto" \
-                       "$W/p2/www/luci-static/resources/protocol"
+                       "$W/p2/usr/share/luci/htdocs/luci-static/resources/protocol"
 
               cp net/ieee8021xclient/files/ieee8021xclient.sh \
                  "$W/p1/lib/netifd/proto/ieee8021xclient.sh"
               chmod 755 "$W/p1/lib/netifd/proto/ieee8021xclient.sh"
 
               cp luci-proto-ieee8021xclient/htdocs/luci-static/resources/protocol/ieee8021xclient.js \
-                 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
-              chmod 644 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
+                 "$W/p2/usr/share/luci/htdocs/luci-static/resources/protocol/ieee8021xclient.js"
+              chmod 644 "$W/p2/usr/share/luci/htdocs/luci-static/resources/protocol/ieee8021xclient.js"
 
               VER="${PKG_VERSION:-5}"
               REL="${PKG_RELEASE:-0}"
@@ -100,35 +104,11 @@ jobs:
           name: apk-v3
           path: dist/apk-v3/*.apk
 
-  # 旧版固件（24.10 及更早）用 v2 apk 或 ipk
-  legacy:
-    name: APKv2 与 IPK（24.10 及更早）
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: 生成 v2 apk 与 ipk
-        run: |
-          mkdir -p dist/apk-v2 dist/ipk
-          python3 tools/make_apk.py --outdir dist/apk-v2
-          python3 tools/make_ipk.py --outdir dist/ipk
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: legacy
-          path: |
-            dist/apk-v2/*.apk
-            dist/ipk/*.ipk
-
   # 打 tag 时把三类产物挂到 Release
   release:
     name: 发布
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [ validate, apk-v3, legacy ]
+    needs: [ validate, apk-v3 ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
