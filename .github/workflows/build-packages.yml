@@ -64,12 +64,10 @@ jobs:
               chmod 644 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
 
               # Create post-install script to restart services
-              cat << EOF > "$W/post-install.sh"
-#!/bin/sh
-/etc/init.d/network restart
-/etc/init.d/rpcd restart
-exit 0
-EOF
+              echo "#!/bin/sh" > "$W/post-install.sh"
+              echo "/etc/init.d/network restart" >> "$W/post-install.sh"
+              echo "/etc/init.d/rpcd restart" >> "$W/post-install.sh"
+              echo "exit 0" >> "$W/post-install.sh"
               chmod 755 "$W/post-install.sh"
 
               VER="${PKG_VERSION:-5}"
@@ -135,22 +133,18 @@ EOF
           cp net/ieee8021xclient/files/ieee8021xclient.sh "$W/data/lib/netifd/proto/ieee8021xclient.sh"
           chmod 755 "$W/data/lib/netifd/proto/ieee8021xclient.sh"
           
-          cat <<EOF > "$W/control/control"
-Package: ieee8021xclient
-Version: ${VER}-r${REL}
-Architecture: all
-Maintainer: David Yang <mmyangfl@gmail.com>
-Description: Wired 802.1x client config support in /etc/config/network
-EOF
+          echo "Package: ieee8021xclient" > "$W/control/control"
+          echo "Version: ${VER}-r${REL}" >> "$W/control/control"
+          echo "Architecture: all" >> "$W/control/control"
+          echo "Maintainer: David Yang <mmyangfl@gmail.com>" >> "$W/control/control"
+          echo "Description: Wired 802.1x client config support in /etc/config/network" >> "$W/control/control"
           
-          cat <<'EOF' > "$W/control/postinst"
-#!/bin/sh
-[ -n "${IPKG_INSTROOT}" ] || {
-  /etc/init.d/network restart
-  /etc/init.d/rpcd restart
-}
-exit 0
-EOF
+          echo "#!/bin/sh" > "$W/control/postinst"
+          echo "[ -n \"\${IPKG_INSTROOT}\" ] || {" >> "$W/control/postinst"
+          echo "  /etc/init.d/network restart" >> "$W/control/postinst"
+          echo "  /etc/init.d/rpcd restart" >> "$W/control/postinst"
+          echo "}" >> "$W/control/postinst"
+          echo "exit 0" >> "$W/control/postinst"
           chmod 755 "$W/control/postinst"
           
           (cd "$W/data" && tar -czf ../data.tar.gz .)
@@ -166,23 +160,19 @@ EOF
           cp luci-proto-ieee8021xclient/htdocs/luci-static/resources/protocol/ieee8021xclient.js "$W/data/www/luci-static/resources/protocol/ieee8021xclient.js"
           chmod 644 "$W/data/www/luci-static/resources/protocol/ieee8021xclient.js"
           
-          cat <<EOF > "$W/control/control"
-Package: luci-proto-ieee8021xclient
-Version: 1-r0
-Depends: ieee8021xclient
-Architecture: all
-Maintainer: David Yang <mmyangfl@gmail.com>
-Description: LuCI support for the wired IEEE 802.1X client protocol
-EOF
+          echo "Package: luci-proto-ieee8021xclient" > "$W/control/control"
+          echo "Version: 1-r0" >> "$W/control/control"
+          echo "Depends: ieee8021xclient" >> "$W/control/control"
+          echo "Architecture: all" >> "$W/control/control"
+          echo "Maintainer: David Yang <mmyangfl@gmail.com>" >> "$W/control/control"
+          echo "Description: LuCI support for the wired IEEE 802.1X client protocol" >> "$W/control/control"
           
-          cat <<'EOF' > "$W/control/postinst"
-#!/bin/sh
-[ -n "${IPKG_INSTROOT}" ] || {
-  /etc/init.d/network restart
-  /etc/init.d/rpcd restart
-}
-exit 0
-EOF
+          echo "#!/bin/sh" > "$W/control/postinst"
+          echo "[ -n \"\${IPKG_INSTROOT}\" ] || {" >> "$W/control/postinst"
+          echo "  /etc/init.d/network restart" >> "$W/control/postinst"
+          echo "  /etc/init.d/rpcd restart" >> "$W/control/postinst"
+          echo "}" >> "$W/control/postinst"
+          echo "exit 0" >> "$W/control/postinst"
           chmod 755 "$W/control/postinst"
           
           (cd "$W/data" && tar -czf ../data.tar.gz .)
