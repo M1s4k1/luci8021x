@@ -2,6 +2,7 @@ name: Build packages
 
 on:
   push:
+    branches: [ main, master ]
     tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
@@ -63,7 +64,7 @@ jobs:
               chmod 644 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
 
               # Create post-install script to restart services
-              cat << 'EOF' > "$W/post-install.sh"
+              cat << EOF > "$W/post-install.sh"
 #!/bin/sh
 /etc/init.d/network restart
 /etc/init.d/rpcd restart
