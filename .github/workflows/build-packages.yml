@@ -53,15 +53,15 @@ jobs:
               W=/tmp/apkbuild
               rm -rf "$W"
               mkdir -p "$W/p1/lib/netifd/proto" \
-                       "$W/p2/usr/share/luci/htdocs/luci-static/resources/protocol"
+                       "$W/p2/www/luci-static/resources/protocol"
 
               cp net/ieee8021xclient/files/ieee8021xclient.sh \
                  "$W/p1/lib/netifd/proto/ieee8021xclient.sh"
               chmod 755 "$W/p1/lib/netifd/proto/ieee8021xclient.sh"
 
               cp luci-proto-ieee8021xclient/htdocs/luci-static/resources/protocol/ieee8021xclient.js \
-                 "$W/p2/usr/share/luci/htdocs/luci-static/resources/protocol/ieee8021xclient.js"
-              chmod 644 "$W/p2/usr/share/luci/htdocs/luci-static/resources/protocol/ieee8021xclient.js"
+                 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
+              chmod 644 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
 
               VER="${PKG_VERSION:-5}"
               REL="${PKG_RELEASE:-0}"
