@@ -1,0 +1,144 @@
+name: Build packages
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # 先做静态校验，问题早暴露，不浪费打包时间
+  validate:
+    name: 静态校验
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell 语法检查
+        run: |
+          sh -n net/ieee8021xclient/files/ieee8021xclient.sh
+          sh -n tools/build_apk_on_router.sh
+          echo "shell 语法 OK"
+
+      - name: LuCI 协议脚本语法检查
+        run: node --check luci-proto-ieee8021xclient/htdocs/luci-static/resources/protocol/ieee8021xclient.js
+
+      - name: 协议行为测试（桩环境，不联网）
+        run: bash tools/test_proto_locally.sh
+
+  # OpenWrt / ImmortalWrt 25.12+ 只接受 APKv3，必须用 Alpine 官方 apk-tools 生成
+  apk-v3:
+    name: APKv3（25.12+）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 用 Alpine 官方 apk-tools 打包
+        run: |
+          mkdir -p dist/apk-v3
+          docker run --rm \
+            -v "$PWD:/work" -w /work \
+            alpine:edge \
+            sh -c '
+              set -e
+              apk --version
+              echo "---- mkpkg 选项 ----"
+              apk mkpkg --help 2>&1 | sed -n "1,25p"
+
+              W=/tmp/apkbuild
+              rm -rf "$W"
+              mkdir -p "$W/p1/lib/netifd/proto" \
+                       "$W/p2/www/luci-static/resources/protocol"
+
+              cp net/ieee8021xclient/files/ieee8021xclient.sh \
+                 "$W/p1/lib/netifd/proto/ieee8021xclient.sh"
+              chmod 755 "$W/p1/lib/netifd/proto/ieee8021xclient.sh"
+
+              cp luci-proto-ieee8021xclient/htdocs/luci-static/resources/protocol/ieee8021xclient.js \
+                 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
+              chmod 644 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
+
+              VER="${PKG_VERSION:-5}"
+              REL="${PKG_RELEASE:-0}"
+
+              apk mkpkg --files "$W/p1" \
+                --info name:ieee8021xclient \
+                --info "version:${VER}-r${REL}" \
+                --info arch:noarch \
+                --info "description:Wired 802.1x client config support in /etc/config/network" \
+                --info license:GPL-2.0-or-later \
+                --info origin:ieee8021xclient \
+                --info "maintainer:David Yang <mmyangfl@gmail.com>" \
+                --info url:https://github.com/openwrt/packages \
+                --output "dist/apk-v3/ieee8021xclient-${VER}-r${REL}.apk"
+
+              apk mkpkg --files "$W/p2" \
+                --info name:luci-proto-ieee8021xclient \
+                --info version:1-r0 \
+                --info arch:noarch \
+                --info "description:LuCI support for the wired IEEE 802.1X client protocol" \
+                --info license:GPL-2.0-or-later \
+                --info origin:luci-proto-ieee8021xclient \
+                --info "maintainer:David Yang <mmyangfl@gmail.com>" \
+                --info url:https://github.com/openwrt/packages \
+                --info depends:ieee8021xclient \
+                --output dist/apk-v3/luci-proto-ieee8021xclient-1-r0.apk
+            '
+
+      - name: 校验产物是 APKv3（文件头 ADB）
+        run: |
+          ls -l dist/apk-v3/
+          for f in dist/apk-v3/*.apk; do
+            magic=$(head -c 3 "$f")
+            echo "$f -> magic=$magic"
+            [ "$magic" = "ADB" ] || { echo "!! 不是 APKv3: $f"; exit 1; }
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-v3
+          path: dist/apk-v3/*.apk
+
+  # 旧版固件（24.10 及更早）用 v2 apk 或 ipk
+  legacy:
+    name: APKv2 与 IPK（24.10 及更早）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 生成 v2 apk 与 ipk
+        run: |
+          mkdir -p dist/apk-v2 dist/ipk
+          python3 tools/make_apk.py --outdir dist/apk-v2
+          python3 tools/make_ipk.py --outdir dist/ipk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy
+          path: |
+            dist/apk-v2/*.apk
+            dist/ipk/*.ipk
+
+  # 打 tag 时把三类产物挂到 Release
+  release:
+    name: 发布
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [ validate, apk-v3, legacy ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 附加到 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*

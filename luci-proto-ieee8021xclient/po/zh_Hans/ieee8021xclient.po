@@ -1,0 +1,134 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "IEEE 802.1X Client"
+msgstr "IEEE 802.1X 客户端"
+
+msgid "EAP method"
+msgstr "EAP 方法"
+
+msgid "Outer EAP method, e.g. PEAP, TTLS, TLS or MD5. Leave empty to let wpa_supplicant negotiate any compiled-in method."
+msgstr "外层 EAP 方法，例如 PEAP、TTLS、TLS 或 MD5。留空则由 wpa_supplicant 自动协商已编译的方法。"
+
+msgid "Identity"
+msgstr "用户名"
+
+msgid "Username sent to the authentication server."
+msgstr "发送给认证服务器的用户名。"
+
+msgid "Anonymous identity"
+msgstr "匿名用户名"
+
+msgid "Outer identity sent in clear text. Only useful with PEAP or TTLS."
+msgstr "明文发送的外层用户名，仅在使用 PEAP 或 TTLS 时有意义。"
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Password or, with EAP-TLS, not needed if the private key is used."
+msgstr "密码；使用 EAP-TLS 且已配置私钥时可留空。"
+
+msgid "EAPOL version"
+msgstr "EAPOL 版本"
+
+msgid "EAPOL protocol version. Most campus and enterprise networks use 2."
+msgstr "EAPOL 协议版本，多数校园网和企业网使用 2。"
+
+msgid "Use default"
+msgstr "使用默认值"
+
+msgid "Version 1"
+msgstr "版本 1"
+
+msgid "Version 2"
+msgstr "版本 2"
+
+msgid "EAP workaround"
+msgstr "EAP 兼容开关"
+
+msgid "Enable wpa_supplicant workarounds for misbehaving authentication servers."
+msgstr "启用 wpa_supplicant 针对不规范认证服务器的兼容处理。"
+
+msgid "Phase 1 options"
+msgstr "阶段 1 参数"
+
+msgid "Outer authentication parameters, e.g. peaplabel=0 or allow_canned_success=1."
+msgstr "外层认证参数，例如 peaplabel=0 或 allow_canned_success=1。"
+
+msgid "Phase 2 options"
+msgstr "阶段 2 参数"
+
+msgid "Inner authentication, e.g. auth=MSCHAPV2 for PEAP or autheap=TLS for TTLS."
+msgstr "内层认证，例如 PEAP 用 auth=MSCHAPV2，TTLS 用 autheap=TLS。"
+
+msgid "CA certificate"
+msgstr "CA 证书"
+
+msgid "Path to the trusted CA certificate file (PEM or DER) on this device."
+msgstr "本设备上受信任 CA 证书文件的路径（PEM 或 DER）。"
+
+msgid "Client certificate"
+msgstr "客户端证书"
+
+msgid "Path to the client certificate file (PEM or DER)."
+msgstr "客户端证书文件的路径（PEM 或 DER）。"
+
+msgid "Private key"
+msgstr "私钥"
+
+msgid "Path to the client private key file."
+msgstr "客户端私钥文件的路径。"
+
+msgid "Private key password"
+msgstr "私钥密码"
+
+msgid "Password protecting the private key file."
+msgstr "保护私钥文件的密码。"
+
+msgid "DH/DSA parameters file"
+msgstr "DH/DSA 参数文件"
+
+msgid "Path to the DH/DSA parameters file (PEM). Rarely needed."
+msgstr "DH/DSA 参数文件路径（PEM），一般不需要。"
+
+msgid "Subject match"
+msgstr "主题匹配"
+
+msgid "Substring that must be present in the subject of the server certificate."
+msgstr "服务器证书主题中必须包含的子串。"
+
+msgid "CA certificate (phase 2)"
+msgstr "CA 证书（阶段 2）"
+
+msgid "Like CA certificate, but for the inner EAP-TTLS or EAP-PEAP authentication."
+msgstr "同 CA 证书，但用于 EAP-TTLS 或 EAP-PEAP 的内层认证。"
+
+msgid "Client certificate (phase 2)"
+msgstr "客户端证书（阶段 2）"
+
+msgid "Like client certificate, but for the inner authentication."
+msgstr "同客户端证书，但用于内层认证。"
+
+msgid "Private key (phase 2)"
+msgstr "私钥（阶段 2）"
+
+msgid "Like private key, but for the inner authentication."
+msgstr "同私钥，但用于内层认证。"
+
+msgid "Private key password (phase 2)"
+msgstr "私钥密码（阶段 2）"
+
+msgid "Like private key password, but for the inner authentication."
+msgstr "同私钥密码，但用于内层认证。"
+
+msgid "DH/DSA parameters file (phase 2)"
+msgstr "DH/DSA 参数文件（阶段 2）"
+
+msgid "Like DH/DSA parameters file, but for the inner authentication."
+msgstr "同 DH/DSA 参数文件，但用于内层认证。"
+
+msgid "Subject match (phase 2)"
+msgstr "主题匹配（阶段 2）"
+
+msgid "Like subject match, but for the inner authentication."
+msgstr "同主题匹配，但用于内层认证。"
