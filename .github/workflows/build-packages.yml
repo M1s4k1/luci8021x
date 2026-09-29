@@ -63,6 +63,15 @@ jobs:
                  "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
               chmod 644 "$W/p2/www/luci-static/resources/protocol/ieee8021xclient.js"
 
+              # Create post-install script to restart services
+              cat << 'EOF' > "$W/post-install.sh"
+#!/bin/sh
+/etc/init.d/network restart
+/etc/init.d/rpcd restart
+exit 0
+EOF
+              chmod 755 "$W/post-install.sh"
+
               VER="${PKG_VERSION:-5}"
               REL="${PKG_RELEASE:-0}"
 
@@ -75,6 +84,7 @@ jobs:
                 --info origin:ieee8021xclient \
                 --info "maintainer:David Yang <mmyangfl@gmail.com>" \
                 --info url:https://github.com/openwrt/packages \
+                --script "post-install:$W/post-install.sh" \
                 --output "dist/apk-v3/ieee8021xclient-${VER}-r${REL}.apk"
 
               apk mkpkg --files "$W/p2" \
@@ -87,6 +97,7 @@ jobs:
                 --info "maintainer:David Yang <mmyangfl@gmail.com>" \
                 --info url:https://github.com/openwrt/packages \
                 --info depends:ieee8021xclient \
+                --script "post-install:$W/post-install.sh" \
                 --output dist/apk-v3/luci-proto-ieee8021xclient-1-r0.apk
             '
 
