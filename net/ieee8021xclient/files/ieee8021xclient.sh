@@ -123,8 +123,9 @@ proto_ieee8021xclient_setup() {
 		return 1
 	}
 
-	# 配置里含明文口令，收紧权限
-	chmod 600 "$_config" 2>/dev/null
+	# 在较新的 OpenWrt (21.02+) 中，wpa_supplicant 并非以 root 运行，而是 network 用户。
+	# 因此生成的配置文件必须允许 network 用户读取（644），否则会因 Permission denied 导致加载失败。
+	chmod 644 "$_config" 2>/dev/null
 
 	if ! ubus call wpa_supplicant config_add "{ \"driver\":\"wired\", \"iface\": \"$ifname\", \"config\": \"$_config\" }"; then
 		# 只记录，不改变 netifd 状态机：让原有行为保持不变，但故障不再静默
